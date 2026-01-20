@@ -149,13 +149,7 @@ const checkModelHealth = async (baseUrl, healthEndpoint) => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const response = await fetch(`${baseUrl}${healthEndpoint}`, { 
-      method: "GET", 
-      signal: controller.signal,
-      headers: {
-        "ngrok-skip-browser-warning": "true"
-      }
-    });
+    const response = await fetch(`${baseUrl}${healthEndpoint}`, { method: "GET", signal: controller.signal });
     clearTimeout(timeoutId);
     if (response.ok) return { status: "connected", data: await response.json() };
     return { status: "error", error: `Server returned ${response.status}` };
@@ -168,14 +162,7 @@ const checkModelHealth = async (baseUrl, healthEndpoint) => {
 
 const runDetection = async (baseUrl, endpoint, requestBody) => {
   try {
-    const response = await fetch(`${baseUrl}${endpoint}`, { 
-      method: "POST", 
-      headers: { 
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true"
-      }, 
-      body: JSON.stringify(requestBody) 
-    });
+    const response = await fetch(`${baseUrl}${endpoint}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody) });
     if (!response.ok) throw new Error(await response.text());
     return response.json();
   } catch (error) {
