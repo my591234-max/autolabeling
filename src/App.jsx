@@ -21,12 +21,12 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 const MODEL_CONFIGS = {
   "yolo-v8": {
     id: "yolo-v8", name: "YOLOv8", category: "Closed-Set Detection", requiresPrompt: false,
-    endpoint: "/yolo", healthEndpoint: "/health", defaultPort: 8001,
+    endpoint: "/yolo", healthEndpoint: "/health", defaultPort: 8000,
     thresholds: { confidence: { label: "Confidence", default: 0.25, min: 0.05, max: 0.95 }, iou: { label: "IoU (NMS)", default: 0.45, min: 0.1, max: 0.9 } },
   },
   "yolo-v11": {
     id: "yolo-v11", name: "YOLOv11", category: "Closed-Set Detection", requiresPrompt: false,
-    endpoint: "/yolo11", healthEndpoint: "/health", defaultPort: 8001,
+    endpoint: "/yolo11", healthEndpoint: "/health", defaultPort: 8000,
     thresholds: { confidence: { label: "Confidence", default: 0.25, min: 0.05, max: 0.95 }, iou: { label: "IoU (NMS)", default: 0.45, min: 0.1, max: 0.9 } },
   },
   "grounding-dino": {
@@ -36,7 +36,7 @@ const MODEL_CONFIGS = {
   },
   "coming-soon": {
     id: "coming-soon", name: "Coming Soon", category: "Open-World Detection", requiresPrompt: false, disabled: true,
-    endpoint: "/yolo11", healthEndpoint: "/health", defaultPort: 8001,
+    endpoint: "/yolo11", healthEndpoint: "/health", defaultPort: 8000,
     thresholds: { confidence: { label: "Confidence", default: 0.25, min: 0.05, max: 0.95 }, iou: { label: "IoU (NMS)", default: 0.45, min: 0.1, max: 0.9 } },
   },
 };
@@ -541,7 +541,8 @@ export default function AutoLabelProV7() {
   const canvasRef = useRef(null);
 
   // Server config
-  const [serverUrls, setServerUrls] = useState({ "grounding-dino": "http://localhost:8000", "yolo-v8": "http://localhost:8001", "yolo-v11": "http://localhost:8001" });
+  // Unified server URL - all models use the same server
+  const [serverUrl, setServerUrl] = useState("http://localhost:8000");
   const [showServerConfig, setShowServerConfig] = useState(false);
 
   // Model state
@@ -619,7 +620,7 @@ export default function AutoLabelProV7() {
 
   // Derived
   const currentModelConfig = MODEL_CONFIGS[selectedModel];
-  const currentServerUrl = serverUrls[selectedModel];
+  const currentServerUrl = serverUrl;
   const currentImage = images[currentImageIndex] || null;
   const currentRegions = currentImage ? regions[currentImage.id] || [] : [];
   const totalRegionsAllImages = Object.values(regions).flat().length;
@@ -1196,7 +1197,7 @@ export default function AutoLabelProV7() {
               <span style={{ color: modelStatus === "connected" ? "#38A169" : "#718096" }}>{modelStatus === "connected" ? "Connected" : modelStatus === "checking" ? "Checking..." : "Disconnected"}</span>
             </div>
             <button onClick={() => setShowServerConfig(!showServerConfig)} style={{ marginTop: 4, fontSize: 10, color: "#718096", background: "none", border: "none", cursor: "pointer" }}>⚙️ Server</button>
-            {showServerConfig && <input type="text" value={currentServerUrl} onChange={(e) => setServerUrls((prev) => ({ ...prev, [selectedModel]: e.target.value }))} style={{ width: "100%", padding: "6px 8px", fontSize: 11, border: "1px solid #E2E8F0", borderRadius: 4, marginTop: 4 }} />}
+            {showServerConfig && <input type="text" value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} placeholder="https://your-server.ngrok-free.dev" style={{ width: "100%", padding: "6px 8px", fontSize: 11, border: "1px solid #E2E8F0", borderRadius: 4, marginTop: 4 }} />}
           </div>
           {currentModelConfig?.requiresPrompt && (
             <div style={{ flex: 1, maxWidth: 500 }}>
